@@ -21,6 +21,7 @@ const client = new MongoClient(uri, {
 const run = async () => {
   await client.connect();
   const productsCollection = await client.db("tools").collection("products");
+  const orderCollection = await client.db("tools").collection("orders");
 
   app.get("/", async (req, res) => {
     res.send("working");
@@ -51,8 +52,29 @@ const run = async () => {
     const product = await productsCollection.findOne(query);
     res.send(product);
   });
-};
 
+  app.post("/order", async (req, res) => {
+    const { OrderInformation } = req.body;
+    const { orderQuantity, productID } = OrderInformation;
+    const filter = { _id: ObjectId(productID) };
+
+    const result = await orderCollection.insertOne(OrderInformation);
+    if (result.insertedId) {
+      const product = await productsCollection.findOne(filter);
+      const { quantity } = product;
+      const newQuantity = Number(quantity) - Number(orderQuantity);
+
+      const updateDoc = {
+        $set: {
+          ...product,
+          quantity: newQuantity,
+        },
+      };
+      const res = await productsCollection.updateOne(filter, updateDoc);
+    }
+    res.send(result);
+  });
+};
 run().catch(console.dir);
 
 app.listen(port, () => console.log("running at ", port));
