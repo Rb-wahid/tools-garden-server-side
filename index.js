@@ -26,6 +26,20 @@ const run = async () => {
     res.send("working");
   });
 
+  app.post("/token", async (req, res) => {
+    const { email } = req.body;
+    console.log(email);
+    jwt.sign(
+      { email },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" },
+      function (err, token) {
+        console.log(token);
+        res.send(token);
+      }
+    );
+  });
+
   app.get("/products", async (req, res) => {
     const products = await productsCollection.find({}).toArray();
     res.send(products);
