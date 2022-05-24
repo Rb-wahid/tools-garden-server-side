@@ -25,6 +25,11 @@ const run = async () => {
   app.get("/", async (req, res) => {
     res.send("working");
   });
+
+  app.get("/products", async (req, res) => {
+    const products = await productsCollection.find({}).toArray();
+    res.send(products);
+  });
 };
 
 run().catch(console.dir);
