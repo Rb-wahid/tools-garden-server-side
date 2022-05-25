@@ -55,6 +55,20 @@ const run = async () => {
     res.send(user);
   });
 
+  app.post("/update-user", async (req, res) => {
+    let user = req.body.user;
+    user = Object.fromEntries(
+      Object.entries(user).filter(([key]) => key !== "_id")
+    );
+    const email = user.email;
+    const filter = { email };
+    const updateDoc = {
+      $set: { ...user },
+    };
+    const result = await userCollection.updateOne(filter, updateDoc);
+    res.send(result);
+  });
+
   app.get("/products", async (req, res) => {
     const products = await productsCollection.find({}).toArray();
     res.send(products);
