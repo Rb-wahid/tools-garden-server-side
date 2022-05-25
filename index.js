@@ -105,6 +105,12 @@ const run = async () => {
     }
     res.send(result);
   });
+
+  app.get("/order/:email", async (req, res) => {
+    const { email } = req.params;
+    const myOrder = await orderCollection.find({ email }).toArray();
+    res.send(myOrder);
+  });
 };
 run().catch(console.dir);
 
