@@ -111,6 +111,14 @@ const run = async () => {
     const myOrder = await orderCollection.find({ email }).toArray();
     res.send(myOrder);
   });
+  
+  app.get("/order-details/:id", async (req, res) => {
+    const { id } = req.params;
+    const filter = { _id: ObjectId(id) }
+    const order = await orderCollection.findOne(filter);
+    res.send(order);
+  });
+
 };
 run().catch(console.dir);
 
