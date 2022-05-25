@@ -21,6 +21,7 @@ const client = new MongoClient(uri, {
 const run = async () => {
   await client.connect();
   const productsCollection = await client.db("tools").collection("products");
+  const userCollection = await client.db("tools").collection("users");
   const orderCollection = await client.db("tools").collection("orders");
 
   app.get("/", async (req, res) => {
@@ -28,8 +29,15 @@ const run = async () => {
   });
 
   app.post("/token", async (req, res) => {
-    const { email } = req.body;
-    console.log(email);
+    const { user } = req.body;
+    const email = user.email;
+    const filter = { email };
+    const options = { upsert: true };
+    const role = !user.role && "user";
+    const updateDoc = {
+      $set: { ...user, role },
+    };
+    const result = await userCollection.updateOne(filter, updateDoc, options);
     jwt.sign(
       { email },
       process.env.JWT_SECRET,
@@ -39,6 +47,12 @@ const run = async () => {
         res.send(token);
       }
     );
+  });
+
+  app.get("/user/:email", async (req, res) => {
+    const { email } = req.params;
+    const user = await userCollection.findOne({ email });
+    res.send(user);
   });
 
   app.get("/products", async (req, res) => {
