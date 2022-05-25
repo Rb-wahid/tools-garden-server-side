@@ -33,7 +33,7 @@ const run = async () => {
     const email = user.email;
     const filter = { email };
     const options = { upsert: true };
-    const role = !user.role && "user";
+    const role = user.role ? user.role : "user";
     const updateDoc = {
       $set: { ...user, role },
     };
@@ -89,13 +89,16 @@ const run = async () => {
     const result = await orderCollection.insertOne(OrderInformation);
     if (result.insertedId) {
       const product = await productsCollection.findOne(filter);
-      const { quantity } = product;
+      const { quantity, minimumOrder } = product;
       const newQuantity = Number(quantity) - Number(orderQuantity);
+      const newMinimumQuantity =
+        newQuantity < 1000 ? newQuantity : minimumOrder;
 
       const updateDoc = {
         $set: {
           ...product,
           quantity: newQuantity,
+          minimumOrder: newMinimumQuantity,
         },
       };
       const res = await productsCollection.updateOne(filter, updateDoc);
