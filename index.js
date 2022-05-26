@@ -19,6 +19,43 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+// Node mailer
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.zoho.com",
+  port: "465",
+  secure: true,
+  auth: {
+    user: process.env.ZOHO_EMAIL,
+    pass: process.env.ZOHO_PASS,
+  },
+});
+
+// send email config
+
+function sendEmail(user, email, body) {
+  console.log(user, body);
+  const receiver = "dev.rbwahid@gmail.com"; //email;
+  const emailStructure = {
+    from: process.env.ZOHO_EMAIL,
+    to: receiver,
+    subject: "Payment Completed",
+    text: body,
+    html: `
+      <h5>Hello ${user},</h5>
+      <p>${body}</p>
+    `,
+  };
+
+  transporter.sendMail(emailStructure, function (err, info) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("Message send: ", info);
+    }
+  });
+}
+
 const run = async () => {
   await client.connect();
   const productsCollection = await client.db("tools").collection("products");
@@ -142,9 +179,10 @@ const run = async () => {
         transactionId: payment.transactionId,
       },
     };
-    const email_body = `Successfully payment complete. TransactionId - ${payment.transactionId}`;
+    const email_body = `Successfully payment complete for product ID ${payment.productID}. TransactionId - ${payment.transactionId}`;
+    const { email, user } = payment;
 
-    sendEmail(email_body);
+    sendEmail(user, email, email_body);
     const result = await paymentCollection.insertOne(payment);
     const order = await orderCollection.updateOne(filter, updateDoc);
     res.send(updateDoc);
