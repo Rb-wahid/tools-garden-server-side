@@ -35,7 +35,7 @@ const transporter = nodemailer.createTransport({
 
 function sendEmail(user, email, body) {
   console.log(user, body);
-  const receiver = "dev.rbwahid@gmail.com"; //email;
+  const receiver = email;
   const emailStructure = {
     from: process.env.ZOHO_EMAIL,
     to: receiver,
@@ -71,8 +71,12 @@ const run = async () => {
     const { user } = req.body;
     const email = user.email;
     const filter = { email };
+    const getUser = await userCollection.findOne(filter);
+    let role = "user";
+    if (getUser) {
+      role = getUser.role;
+    }
     const options = { upsert: true };
-    const role = user.role ? user.role : "user";
     const updateDoc = {
       $set: { ...user, role },
     };
