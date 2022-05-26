@@ -196,6 +196,19 @@ const run = async () => {
     const users = await userCollection.find({}).toArray();
     res.send(users);
   });
+
+  app.put("/make-admin", async (req, res) => {
+    const { email } = req.body;
+    const filter = { email };
+    const updateDoc = {
+      $set: {
+        role: "admin",
+      },
+    };
+    const result = await userCollection.updateOne(filter, updateDoc);
+    console.log(result);
+    res.send(result);
+  });
 };
 run().catch(console.dir);
 
