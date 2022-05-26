@@ -206,7 +206,18 @@ const run = async () => {
       },
     };
     const result = await userCollection.updateOne(filter, updateDoc);
-    console.log(result);
+    res.send(result);
+  });
+
+  app.put("/remove-admin", async (req, res) => {
+    const { email } = req.body;
+    const filter = { email };
+    const updateDoc = {
+      $set: {
+        role: "user",
+      },
+    };
+    const result = await userCollection.updateOne(filter, updateDoc);
     res.send(result);
   });
 };
