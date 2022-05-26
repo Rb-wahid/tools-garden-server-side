@@ -191,6 +191,11 @@ const run = async () => {
     const order = await orderCollection.updateOne(filter, updateDoc);
     res.send(updateDoc);
   });
+
+  app.get("/users", async (req, res) => {
+    const users = await userCollection.find({}).toArray();
+    res.send(users);
+  });
 };
 run().catch(console.dir);
 
