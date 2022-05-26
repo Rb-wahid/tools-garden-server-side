@@ -220,6 +220,16 @@ const run = async () => {
     const result = await userCollection.updateOne(filter, updateDoc);
     res.send(result);
   });
+
+  app.post("/add-product", async (req, res) => {
+    const { productInformation } = req.body;
+
+    const result = await productsCollection.insertOne({
+      ...productInformation,
+    });
+    console.log(result);
+    res.send(result);
+  });
 };
 run().catch(console.dir);
 
