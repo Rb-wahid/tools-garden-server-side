@@ -135,7 +135,7 @@ const run = async () => {
       const { quantity, minimumOrder } = product;
       const newQuantity = Number(quantity) - Number(orderQuantity);
       const newMinimumQuantity =
-        newQuantity < 1000 ? newQuantity : minimumOrder;
+        newQuantity < minimumOrder ? newQuantity : minimumOrder;
 
       const updateDoc = {
         $set: {
@@ -187,6 +187,7 @@ const run = async () => {
     const updateDoc = {
       $set: {
         isPaid: true,
+        status: "processing",
         transactionId: payment.transactionId,
       },
     };
