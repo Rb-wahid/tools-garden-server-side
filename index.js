@@ -227,7 +227,6 @@ const run = async () => {
     const result = await productsCollection.insertOne({
       ...productInformation,
     });
-    console.log(result);
     res.send(result);
   });
 
@@ -235,11 +234,19 @@ const run = async () => {
     const { id } = req.params;
     const filter = { _id: ObjectId(id) };
     const result = await productsCollection.deleteOne(filter);
-    console.log(filter);
-    console.log(result);
     res.send(result);
   });
 
+  app.put("/update-product/:id", async (req, res) => {
+    const { id } = req.params;
+    const { productInformation } = req.body;
+    const filter = { _id: ObjectId(id) };
+    const updateDoc = {
+      $set: { ...productInformation },
+    };
+    const result = await productsCollection.updateOne(filter, updateDoc);
+    res.send(result);
+  });
 };
 run().catch(console.dir);
 
