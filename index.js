@@ -230,6 +230,16 @@ const run = async () => {
     console.log(result);
     res.send(result);
   });
+
+  app.delete("/delete-product/:id", async (req, res) => {
+    const { id } = req.params;
+    const filter = { _id: ObjectId(id) };
+    const result = await productsCollection.deleteOne(filter);
+    console.log(filter);
+    console.log(result);
+    res.send(result);
+  });
+
 };
 run().catch(console.dir);
 
