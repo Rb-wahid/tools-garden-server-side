@@ -62,6 +62,7 @@ const run = async () => {
   const userCollection = await client.db("tools").collection("users");
   const orderCollection = await client.db("tools").collection("orders");
   const paymentCollection = await client.db("tools").collection("payment");
+  const reviewCollection = await client.db("tools").collection("review");
 
   app.get("/", async (req, res) => {
     res.send("working");
@@ -268,6 +269,12 @@ const run = async () => {
       $set: { ...productInformation },
     };
     const result = await productsCollection.updateOne(filter, updateDoc);
+    res.send(result);
+  });
+
+  app.post("/add-review", async (req, res) => {
+    const { reviewInformation } = req.body;
+    const result = await reviewCollection.insertOne({ reviewInformation });
     res.send(result);
   });
 };
