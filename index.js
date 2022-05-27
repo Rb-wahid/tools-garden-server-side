@@ -162,6 +162,13 @@ const run = async () => {
     res.send(order);
   });
 
+  app.delete("/cancel-order/:id", async (req, res) => {
+    const { id } = req.params;
+    const filter = { _id: ObjectId(id) };
+    const result = await orderCollection.deleteOne(filter);
+    res.send(result);
+  });
+
   app.post("/create-payment-intent", async (req, res) => {
     const { price } = req.body;
     const amount = price * 100;
