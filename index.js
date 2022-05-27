@@ -152,7 +152,7 @@ const run = async () => {
   app.get("/orders", async (req, res) => {
     const orders = await orderCollection.find({}).toArray();
     res.send(orders);
-  })
+  });
 
   app.get("/order/:email", async (req, res) => {
     const { email } = req.params;
@@ -171,6 +171,16 @@ const run = async () => {
     const { id } = req.params;
     const filter = { _id: ObjectId(id) };
     const result = await orderCollection.deleteOne(filter);
+    res.send(result);
+  });
+
+  app.put("/shipped-order/:id", async (req, res) => {
+    const { id } = req.params;
+    const filter = { _id: ObjectId(id) };
+    const updateDoc = {
+      $set: { status: "shipped" },
+    };
+    const result = await orderCollection.updateOne(filter, updateDoc);
     res.send(result);
   });
 
