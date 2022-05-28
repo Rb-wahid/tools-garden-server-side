@@ -282,6 +282,20 @@ const run = async () => {
     const result = await reviewCollection.find({}).toArray();
     res.send(result);
   });
+
+  app.get("/stat", async (req, res) => {
+    const customers = await userCollection.countDocuments();
+    const products = await productsCollection.countDocuments();
+    const reviews = await reviewCollection.countDocuments();
+    const orders = await orderCollection.find({}).toArray();
+    const sell = orders.reduce((sum, order) => {
+      if (order.isPaid) {
+        return sum + order.totalPrice;
+      } else return sum + 0;
+    }, 0);
+
+    res.send({ customers, products, reviews, sell });
+  });
 };
 run().catch(console.dir);
 
