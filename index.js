@@ -19,6 +19,23 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+// JWT verification function
+
+const verifyJwt = async (req, res, next) => {
+  console.log(req.headers);
+  const token = req.headers?.authorization.split(" ")[1];
+  if (!req.headers.authorization) {
+    return res.status(401).send({ message: "Unauthorize access" });
+  }
+  jwt.verify(token, process.env.JWT_SECRET, function (err, decoded) {
+    if (err) {
+      return res.status(403).send({ message: "Forbidden access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
+
 // Node mailer
 
 const transporter = nodemailer.createTransport({
@@ -67,6 +84,20 @@ const run = async () => {
   app.get("/", async (req, res) => {
     res.send("working");
   });
+
+  // verification admin
+
+  const verifyAdmin = async (req, res, next) => {
+    const { email } = req.params;
+    const user = await userCollection.findOne({ email });
+    try {
+      if (user.role === "admin") {
+        next();
+      }
+    } catch (error) {
+      return res.status(403).send({ message: "Forbidden access" });
+    }
+  };
 
   app.post("/token", async (req, res) => {
     const { user } = req.body;
@@ -221,7 +252,7 @@ const run = async () => {
     res.send(users);
   });
 
-  app.put("/make-admin", async (req, res) => {
+  app.put("/make-admin/:email", verifyAdmin, async (req, res) => {
     const { email } = req.body;
     const filter = { email };
     const updateDoc = {
@@ -233,7 +264,7 @@ const run = async () => {
     res.send(result);
   });
 
-  app.put("/remove-admin", async (req, res) => {
+  app.put("/remove-admin/:email", verifyAdmin, async (req, res) => {
     const { email } = req.body;
     const filter = { email };
     const updateDoc = {
@@ -245,7 +276,7 @@ const run = async () => {
     res.send(result);
   });
 
-  app.post("/add-product", async (req, res) => {
+  app.post("/add-product/:email", verifyAdmin, async (req, res) => {
     const { productInformation } = req.body;
 
     const result = await productsCollection.insertOne({
@@ -272,10 +303,14 @@ const run = async () => {
     res.send(result);
   });
 
-  app.post("/add-review", async (req, res) => {
+  app.post("/add-review/:email", verifyJwt, async (req, res) => {
     const { reviewInformation } = req.body;
-    const result = await reviewCollection.insertOne({ reviewInformation });
-    res.send(result);
+    const userEmail = req.params.email;
+    const decodedEmail = req.decoded?.email;
+    if (userEmail === decodedEmail) {
+      const result = await reviewCollection.insertOne({ reviewInformation });
+      res.send(result);
+    } else return res.status(403).send({ message: "403 Forbidden" });
   });
 
   app.get("/reviews", async (req, res) => {
